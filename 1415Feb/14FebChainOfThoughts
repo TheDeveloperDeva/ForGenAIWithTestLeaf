@@ -1,0 +1,70 @@
+Context: As a tester of tally app, with a sound knowledge of the application. Write the functional testcases for Invoice module Instructions: [CRITICAL] Ask some MCQ one by one to get the test cases fine-tuned before you generate test case 
+[SHALL] Generate only positive and critical scenarios 
+[MANDATORY] Generate not more than 10 cases
+ [MANDATORY] Follow these columns ID, description, expected result, actual result, comments
+
+
+Got it 👍 — before I generate the final test cases, let’s fine‑tune them step by step with some MCQs. I’ll ask you one at a time, and based on your answers I’ll shape the scenarios so they’re precise and relevant.
+First MCQ: Scope of Invoice Module Testing
+When testing the Invoice module in Tally, which area should we prioritize for positive and critical scenarios?
+- Invoice creation and saving (basic functionality)
+- Invoice printing/export (output correctness)
+- Invoice posting to ledgers/accounts (financial accuracy)
+- Invoice modification and audit trail (compliance focus)
+👉 Which option do you want me to emphasize most in the test cases?
+
+C
+
+Perfect — focusing on Invoice posting to ledgers/accounts will keep our test cases sharp and audit‑critical. Let’s refine further with another MCQ before I draft the table.
+Second MCQ: Transaction Types to Cover
+When validating invoice posting in Tally, which transaction type should we emphasize most in positive/critical scenarios?
+- Sales invoices (customer billing, revenue recognition)
+- Purchase invoices (vendor billing, expense recognition)
+- Both sales and purchase invoices (end‑to‑end coverage)
+- Special cases like credit notes/debit notes (adjustments, compliance)
+👉 Which option do you want me to lock in for the test cases?
+
+A
+
+Great — we’ll lock in Sales Invoices as the transaction type. That narrows the scope nicely. Let’s do one more refinement before I generate the final test cases.
+Third MCQ: Critical Posting Focus
+When a sales invoice posts to ledgers/accounts, which critical aspect should we emphasize most?
+- Customer ledger update (debtor balance accuracy)
+- Sales ledger update (revenue recognition)
+- Tax ledger update (GST/VAT compliance)
+- All three together (integrated posting accuracy)
+👉 Which option should I prioritize in the test cases?
+
+D
+
+Excellent — we’ll emphasize **integrated posting accuracy** (customer, sales, and tax ledgers together). That gives us a strong foundation for positive and critical scenarios.  
+
+Here’s the final set of **functional test cases** for the **Invoice module (Sales Invoices)** in Tally, following your instructions:
+
+---
+
+### Functional Test Cases – Invoice Module (Sales Posting)
+
+| ID | Description | Expected Result | Actual Result | Comments |
+|----|-------------|-----------------|---------------|----------|
+| TC01 | Create a sales invoice with valid customer, item, and tax details | Invoice is saved successfully; postings occur in customer ledger (debit), sales ledger (credit), and tax ledger (credit) | | |
+| TC02 | Post a sales invoice with multiple items and applicable tax | All items are correctly reflected in stock, sales ledger updated, tax ledger updated, customer ledger debited | | |
+| TC03 | Generate a sales invoice with round‑off enabled | Invoice total reflects round‑off adjustment; postings remain balanced across ledgers | | |
+| TC04 | Save a sales invoice with discount applied | Discount is correctly reflected in invoice; sales ledger posts net amount; customer ledger debited accordingly | | |
+| TC05 | Create a sales invoice with GST applied | GST amount is posted to tax ledger; customer ledger debited with gross amount; sales ledger credited with net sales | | |
+| TC06 | Verify invoice numbering sequence | Invoice number auto‑increments correctly; no duplication or gaps | | |
+| TC07 | Post a sales invoice and check ledger balances | Customer ledger shows increased debit balance; sales ledger shows increased credit balance; tax ledger updated | | |
+| TC08 | Export/print invoice after posting | Exported/printed invoice matches saved invoice details; ledger postings remain intact | | |
+| TC09 | Modify a posted invoice (critical scenario) | System allows modification only with audit trail; updated postings reflect changes in ledgers | | |
+| TC10 | Cancel a posted invoice (critical scenario) | Invoice cancellation reverses postings in customer, sales, and tax ledgers; audit trail maintained | | |
+
+---
+
+✅ Only **positive and critical scenarios** included  
+✅ Not more than **10 cases**  
+✅ Columns: **ID, description, expected result, actual result, comments**  
+
+Would you like me to also **prioritize these cases** (e.g., high‑risk vs. medium‑risk) so you can decide which ones to execute first in your test cycle?
+
+
+

@@ -1,0 +1,21 @@
+I can’t directly generate an Excel file for you, but I can give you a ready‑to‑copy table that you can paste into Excel. Each column will align perfectly once you paste it in. Here’s the structured data:
+
+
+ID	Description	Expected Result	Actual Result	Comments
+TC01	Create a sales invoice with valid customer, item, and tax details	Invoice is saved successfully; postings occur in customer ledger (debit), sales ledger (credit), and tax ledger (credit)		
+TC02	Post a sales invoice with multiple items and applicable tax	All items are correctly reflected in stock, sales ledger updated, tax ledger updated, customer ledger debited		
+TC03	Generate a sales invoice with round‑off enabled	Invoice total reflects round‑off adjustment; postings remain balanced across ledgers		
+TC04	Save a sales invoice with discount applied	Discount is correctly reflected in invoice; sales ledger posts net amount; customer ledger debited accordingly		
+TC05	Create a sales invoice with GST applied	GST amount is posted to tax ledger; customer ledger debited with gross amount; sales ledger credited with net sales		
+TC06	Verify invoice numbering sequence	Invoice number auto‑increments correctly; no duplication or gaps		
+TC07	Post a sales invoice and check ledger balances	Customer ledger shows increased debit balance; sales ledger shows increased credit balance; tax ledger updated		
+TC08	Export/print invoice after posting	Exported/printed invoice matches saved invoice details; ledger postings remain intact		
+TC09	Modify a posted invoice (critical scenario)	System allows modification only with audit trail; updated postings reflect changes in ledgers		
+TC10	Cancel a posted invoice (critical scenario)	Invoice cancellation reverses postings in customer, sales, and tax ledgers; audit trail maintained		
+
+
+How to use:
+- Copy the block above.
+- Open Excel (or Google Sheets).
+- Paste it directly — Excel will split the text into columns automatically because of the tab separation.
+👉 Do you want me to also add a priority column (High/Medium) so you can quickly filter which test cases to execute first?
