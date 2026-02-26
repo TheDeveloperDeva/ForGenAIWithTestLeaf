@@ -15,6 +15,8 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedTestCases, setExpandedTestCases] = useState<Set<string>>(new Set())
+  const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null)
+  const [editedCases, setEditedCases] = useState<Map<string, TestCase>>(new Map())
 
   const toggleTestCaseExpansion = (testCaseId: string) => {
     const newExpanded = new Set(expandedTestCases)
@@ -40,6 +42,8 @@ function App() {
 
     setIsLoading(true)
     setError(null)
+    setEditedCases(new Map())
+    setEditingTestCaseId(null)
     
     try {
       const response = await generateTests(formData)
@@ -49,6 +53,86 @@ function App() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleEditTestCase = (testCase: TestCase) => {
+    setEditingTestCaseId(testCase.id)
+    if (!editedCases.has(testCase.id)) {
+      setEditedCases(new Map(editedCases).set(testCase.id, { ...testCase }))
+    }
+  }
+
+  const handleSaveTestCase = (testCaseId: string) => {
+    if (!results) return
+    
+    const editedCase = editedCases.get(testCaseId)
+    if (!editedCase) return
+
+    const updatedCases = results.cases.map(tc => 
+      tc.id === testCaseId ? editedCase : tc
+    )
+    
+    setResults({
+      ...results,
+      cases: updatedCases
+    })
+    setEditingTestCaseId(null)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingTestCaseId(null)
+  }
+
+  const handleEditFieldChange = (testCaseId: string, field: keyof TestCase, value: any) => {
+    const currentCase = editedCases.get(testCaseId)
+    if (!currentCase) return
+
+    if (field === 'steps') {
+      setEditedCases(new Map(editedCases).set(testCaseId, {
+        ...currentCase,
+        steps: value
+      }))
+    } else {
+      setEditedCases(new Map(editedCases).set(testCaseId, {
+        ...currentCase,
+        [field]: value
+      }))
+    }
+  }
+
+  const handleEditStepChange = (testCaseId: string, stepIndex: number, newValue: string) => {
+    const currentCase = editedCases.get(testCaseId)
+    if (!currentCase) return
+
+    const updatedSteps = [...currentCase.steps]
+    updatedSteps[stepIndex] = newValue
+    
+    setEditedCases(new Map(editedCases).set(testCaseId, {
+      ...currentCase,
+      steps: updatedSteps
+    }))
+  }
+
+  const handleAddStep = (testCaseId: string) => {
+    const currentCase = editedCases.get(testCaseId)
+    if (!currentCase) return
+
+    const updatedSteps = [...currentCase.steps, '']
+    setEditedCases(new Map(editedCases).set(testCaseId, {
+      ...currentCase,
+      steps: updatedSteps
+    }))
+  }
+
+  const handleRemoveStep = (testCaseId: string, stepIndex: number) => {
+    const currentCase = editedCases.get(testCaseId)
+    if (!currentCase) return
+
+    const updatedSteps = currentCase.steps.filter((_, i) => i !== stepIndex)
+    setEditedCases(new Map(editedCases).set(testCaseId, {
+      ...currentCase,
+      steps: updatedSteps
+    }))
   }
 
   return (
@@ -463,6 +547,193 @@ function App() {
           color: #172b4d;
         }
 
+        .edit-mode-row {
+          background: #fffbf0;
+        }
+
+        .edit-form-group {
+          margin-bottom: 16px;
+        }
+
+        .edit-form-label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 6px;
+          color: #2c3e50;
+          font-size: 14px;
+        }
+
+        .edit-form-input, .edit-form-textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 14px;
+          font-family: inherit;
+        }
+
+        .edit-form-textarea {
+          min-height: 80px;
+          resize: vertical;
+        }
+
+        .edit-form-input:focus, .edit-form-textarea:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .edit-button-group {
+          display: flex;
+          gap: 10px;
+          margin-top: 16px;
+        }
+
+        .edit-btn-save {
+          background: #27ae60;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color 0.2s;
+        }
+
+        .edit-btn-save:hover {
+          background: #229954;
+        }
+
+        .edit-btn-cancel {
+          background: #e74c3c;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color 0.2s;
+        }
+
+        .edit-btn-cancel:hover {
+          background: #c0392b;
+        }
+
+        .edit-btn-edit {
+          background: #3498db;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 13px;
+          transition: background-color 0.2s;
+        }
+
+        .edit-btn-edit:hover {
+          background: #2980b9;
+        }
+
+        .table-action-cell {
+          text-align: center;
+        }
+
+        .edit-steps-container {
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          padding: 20px;
+          margin-top: 20px;
+        }
+
+        .edit-steps-title {
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 15px;
+          font-size: 16px;
+        }
+
+        .edit-step-item {
+          display: grid;
+          grid-template-columns: 50px 1fr 50px;
+          gap: 10px;
+          margin-bottom: 15px;
+          align-items: start;
+        }
+
+        .edit-step-number {
+          background: #f8f9fa;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 10px;
+          text-align: center;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 12px;
+          min-height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .edit-step-input-wrapper {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+        }
+
+        .edit-step-input {
+          flex: 1;
+          padding: 10px 12px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-family: inherit;
+          font-size: 14px;
+          resize: vertical;
+          min-height: 40px;
+        }
+
+        .edit-step-input:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .edit-step-remove-btn {
+          background: #e74c3c;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 12px;
+          min-height: 40px;
+          transition: background-color 0.2s;
+        }
+
+        .edit-step-remove-btn:hover {
+          background: #c0392b;
+        }
+
+        .edit-add-step-btn {
+          background: #27ae60;
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 14px;
+          margin-top: 15px;
+          transition: background-color 0.2s;
+        }
+
+        .edit-add-step-btn:hover {
+          background: #229954;
+        }
+
         @media (max-width: 1023px) {
           .layout {
             grid-template-columns: 1fr;
@@ -578,60 +849,152 @@ function App() {
                         <th>Title</th>
                         <th>Category</th>
                         <th>Expected Result</th>
+                        <th className="table-action-cell">Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {results.cases.map((testCase: TestCase) => (
-                        <>
-                          <tr key={testCase.id}>
-                            <td>
-                              <div 
-                                className={`test-case-id ${expandedTestCases.has(testCase.id) ? 'expanded' : ''}`}
-                                onClick={() => toggleTestCaseExpansion(testCase.id)}
-                              >
-                                <span className={`expand-icon ${expandedTestCases.has(testCase.id) ? 'expanded' : ''}`}>
-                                  ▶
-                                </span>
-                                {testCase.id}
-                              </div>
-                            </td>
-                            <td>{testCase.title}</td>
-                            <td>
-                              <span className={`category-${testCase.category.toLowerCase()}`}>
-                                {testCase.category}
-                              </span>
-                            </td>
-                            <td>{testCase.expectedResult}</td>
-                          </tr>
-                          {expandedTestCases.has(testCase.id) && (
-                            <tr key={`${testCase.id}-details`}>
-                              <td colSpan={4}>
-                                <div className="expanded-details">
-                                  <h4 style={{marginBottom: '15px', color: '#2c3e50'}}>Test Steps for {testCase.id}</h4>
-                                  <div className="step-labels">
-                                    <div>Step ID</div>
-                                    <div>Step Description</div>
-                                    <div>Test Data</div>
-                                    <div>Expected Result</div>
-                                  </div>
-                                  {testCase.steps.map((step, index) => (
-                                    <div key={index} className="step-item">
-                                      <div className="step-header">
-                                        <div className="step-id">S{String(index + 1).padStart(2, '0')}</div>
-                                        <div className="step-description">{step}</div>
-                                        <div className="step-test-data">{testCase.testData || 'N/A'}</div>
-                                        <div className="step-expected">
-                                          {index === testCase.steps.length - 1 ? testCase.expectedResult : 'Step completed successfully'}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                      {results.cases.map((testCase: TestCase) => {
+                        const isEditing = editingTestCaseId === testCase.id
+                        const editedCase = editedCases.get(testCase.id) || testCase
+                        
+                        return (
+                          <>
+                            <tr key={testCase.id} className={isEditing ? 'edit-mode-row' : ''}>
+                              <td>
+                                <div 
+                                  className={`test-case-id ${expandedTestCases.has(testCase.id) ? 'expanded' : ''}`}
+                                  onClick={() => !isEditing && toggleTestCaseExpansion(testCase.id)}
+                                  style={{ cursor: isEditing ? 'default' : 'pointer' }}
+                                >
+                                  <span className={`expand-icon ${expandedTestCases.has(testCase.id) ? 'expanded' : ''}`}>
+                                    ▶
+                                  </span>
+                                  {testCase.id}
                                 </div>
                               </td>
+                              <td>{isEditing ? (
+                                <input
+                                  type="text"
+                                  className="edit-form-input"
+                                  value={editedCase.title}
+                                  onChange={(e) => handleEditFieldChange(testCase.id, 'title', e.target.value)}
+                                />
+                              ) : (
+                                testCase.title
+                              )}</td>
+                              <td>{isEditing ? (
+                                <input
+                                  type="text"
+                                  className="edit-form-input"
+                                  value={editedCase.category}
+                                  onChange={(e) => handleEditFieldChange(testCase.id, 'category', e.target.value)}
+                                />
+                              ) : (
+                                <span className={`category-${testCase.category.toLowerCase()}`}>
+                                  {testCase.category}
+                                </span>
+                              )}</td>
+                              <td>{isEditing ? (
+                                <textarea
+                                  className="edit-form-textarea"
+                                  value={editedCase.expectedResult}
+                                  onChange={(e) => handleEditFieldChange(testCase.id, 'expectedResult', e.target.value)}
+                                  style={{ minHeight: '60px' }}
+                                />
+                              ) : (
+                                testCase.expectedResult
+                              )}</td>
+                              <td className="table-action-cell">
+                                {isEditing ? (
+                                  <div className="edit-button-group">
+                                    <button 
+                                      className="edit-btn-save"
+                                      onClick={() => handleSaveTestCase(testCase.id)}
+                                    >
+                                      Save
+                                    </button>
+                                    <button 
+                                      className="edit-btn-cancel"
+                                      onClick={handleCancelEdit}
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button 
+                                    className="edit-btn-edit"
+                                    onClick={() => handleEditTestCase(testCase)}
+                                  >
+                                    Edit
+                                  </button>
+                                )}
+                              </td>
                             </tr>
-                          )}
-                        </>
-                      ))}
+                            {expandedTestCases.has(testCase.id) && (
+                              <tr key={`${testCase.id}-details`}>
+                                <td colSpan={5}>
+                                  <div className="expanded-details">
+                                    <h4 style={{marginBottom: '15px', color: '#2c3e50'}}>Test Steps for {testCase.id}</h4>
+                                    
+                                    {isEditing ? (
+                                      <div className="edit-steps-container">
+                                        <div className="edit-steps-title">Edit Test Steps</div>
+                                        {editedCase.steps.map((step, stepIndex) => (
+                                          <div key={stepIndex} className="edit-step-item">
+                                            <div className="edit-step-number">S{String(stepIndex + 1).padStart(2, '0')}</div>
+                                            <div className="edit-step-input-wrapper">
+                                              <textarea
+                                                className="edit-step-input"
+                                                value={step}
+                                                onChange={(e) => handleEditStepChange(testCase.id, stepIndex, e.target.value)}
+                                                placeholder={`Enter step ${stepIndex + 1} description...`}
+                                              />
+                                            </div>
+                                            <button
+                                              className="edit-step-remove-btn"
+                                              onClick={() => handleRemoveStep(testCase.id, stepIndex)}
+                                              title="Remove this step"
+                                            >
+                                              Delete
+                                            </button>
+                                          </div>
+                                        ))}
+                                        <button
+                                          className="edit-add-step-btn"
+                                          onClick={() => handleAddStep(testCase.id)}
+                                        >
+                                          + Add Step
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <div className="step-labels">
+                                          <div>Step ID</div>
+                                          <div>Step Description</div>
+                                          <div>Test Data</div>
+                                          <div>Expected Result</div>
+                                        </div>
+                                        {testCase.steps.map((step, index) => (
+                                          <div key={index} className="step-item">
+                                            <div className="step-header">
+                                              <div className="step-id">S{String(index + 1).padStart(2, '0')}</div>
+                                              <div className="step-description">{step}</div>
+                                              <div className="step-test-data">{testCase.testData || 'N/A'}</div>
+                                              <div className="step-expected">
+                                                {index === testCase.steps.length - 1 ? testCase.expectedResult : 'Step completed successfully'}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
