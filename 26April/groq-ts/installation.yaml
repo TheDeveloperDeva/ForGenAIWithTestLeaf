@@ -1,0 +1,8 @@
+npm init -y
+npm install groq-sdk dotenv
+npm install -D typescript ts-node @types/node
+npx tsc --init
+
+npx ts-node step1-model.ts
+npx ts-node step2-prompt.ts
+npx ts-node step3-tools.ts
